@@ -1,0 +1,140 @@
+.test-mode {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.test-mode h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  text-align: center;
+}
+
+.test-description {
+  margin-bottom: 30px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #17a2b8;
+}
+
+.test-description p {
+  margin: 0;
+  color: #666;
+}
+
+.test-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.test-section:last-child {
+  border-bottom: none;
+}
+
+.test-section h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 16px;
+}
+
+.test-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.test-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.test-btn.primary {
+  background: #007bff;
+  color: white;
+}
+
+.test-btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.test-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.test-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.test-note {
+  margin: 0;
+  font-size: 13px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.test-results {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.test-results h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  font-size: 16px;
+}
+
+.results-content {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.result-line {
+  margin-bottom: 5px;
+  color: #495057;
+}
+
+.result-line:first-child {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.test-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.close-btn {
+  padding: 10px 24px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  opacity: 0.9;
+}

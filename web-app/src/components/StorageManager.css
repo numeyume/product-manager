@@ -1,0 +1,131 @@
+.storage-manager {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.storage-manager h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+}
+
+.storage-section {
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.storage-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.input-group input,
+.input-group select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.input-group button {
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.input-group button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.storage-tree {
+  margin-bottom: 25px;
+}
+
+.storage-tree h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.tree-level1 {
+  margin-bottom: 15px;
+}
+
+.tree-level1 strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.tree-level2 {
+  margin-left: 20px;
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.tree-level3 {
+  margin-left: 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #999;
+  margin-bottom: 3px;
+}
+
+.tree-level3 .delete-btn {
+  padding: 2px 8px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.modal-actions .cancel-btn,
+.modal-actions .save-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.modal-actions .cancel-btn {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modal-actions .save-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.modal-actions .save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

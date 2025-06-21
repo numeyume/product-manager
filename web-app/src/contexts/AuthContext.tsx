@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase';
+import { useDemoMode } from '../components/DemoModeProvider';
 
 interface AuthContextType {
   user: User | null;
@@ -22,19 +23,14 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isDemoMode, demoUser } = useDemoMode();
 
   useEffect(() => {
     // デモモードの確認
-    const demoUser = localStorage.getItem('demoUser');
-    if (demoUser) {
-      try {
-        const parsedUser = JSON.parse(demoUser);
-        setUser(parsedUser as User);
-        setLoading(false);
-        return;
-      } catch (error) {
-        localStorage.removeItem('demoUser');
-      }
+    if (isDemoMode && demoUser) {
+      setUser(demoUser as User);
+      setLoading(false);
+      return;
     }
 
     // Firebase認証の監視（Firebaseが設定されている場合のみ）
@@ -48,18 +44,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Firebase未設定の場合はローディング完了
       setLoading(false);
     }
-  }, []);
+  }, [isDemoMode, demoUser]);
 
   const signInWithGoogle = async () => {
-    if (!isFirebaseConfigured || !auth || !googleProvider) {
-      throw new Error('Firebase is not configured. Please check your .env file or use demo mode.');
+    console.log('Google認証開始:', {
+      isFirebaseConfigured,
+      auth: !!auth,
+      googleProvider: !!googleProvider
+    });
+
+    if (!isFirebaseConfigured) {
+      throw new Error('Firebase設定が見つかりません。デモモードをご利用ください。');
+    }
+
+    if (!auth || !googleProvider) {
+      throw new Error('Firebase認証が初期化されていません。ページをリロードしてください。');
     }
     
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      throw error;
+      console.log('signInWithPopup実行中...');
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google認証成功:', result.user?.email);
+    } catch (error: any) {
+      console.error('Google認証エラー:', error);
+      
+      // より詳細なエラーメッセージ
+      if (error.code === 'auth/popup-closed-by-user') {
+        throw new Error('認証がキャンセルされました。');
+      } else if (error.code === 'auth/popup-blocked') {
+        throw new Error('ポップアップがブロックされました。ブラウザの設定を確認してください。');
+      } else if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Google認証が有効化されていません。Firebase設定を確認してください。');
+      } else {
+        throw new Error(`認証エラー: ${error.message}`);
+      }
     }
   };
 

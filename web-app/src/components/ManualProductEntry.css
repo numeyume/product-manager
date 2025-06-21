@@ -1,55 +1,22 @@
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
+.manual-entry {
   background: white;
-  padding: 30px;
   border-radius: 8px;
+  padding: 24px;
   width: 90%;
-  max-width: 500px;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
 }
 
-.modal-content h2 {
-  margin: 0 0 20px 0;
+.manual-entry h2 {
+  margin: 0 0 24px 0;
   color: #333;
+  font-size: 24px;
 }
 
-.form-group {
+.form-section {
   margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #666;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.storage-inputs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
 }
 
 .form-row {
@@ -58,49 +25,56 @@
   gap: 16px;
 }
 
+.form-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-section input:disabled,
+.form-section select:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.storage-selects {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
 .unit-price-display {
-  padding: 10px;
+  padding: 12px;
   background: #f8f9fa;
-  border: 1px solid #e1e5e9;
-  border-radius: 4px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
   font-size: 16px;
   font-weight: 600;
   color: #28a745;
   text-align: center;
 }
 
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 30px;
-}
-
-.cancel-btn,
-.save-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.cancel-btn {
-  background: #e0e0e0;
-  color: #333;
-}
-
-.save-btn {
-  background: #4CAF50;
-  color: white;
-}
-
-.save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Usage location styles */
 .usage-header {
   display: flex;
   justify-content: space-between;
@@ -144,11 +118,11 @@
   border: 1px solid #e1e5e9;
 }
 
-.usage-fields .form-group {
+.usage-fields .form-section {
   margin-bottom: 16px;
 }
 
-.usage-fields .form-group:last-child {
+.usage-fields .form-section:last-child {
   margin-bottom: 0;
 }
 
@@ -224,4 +198,77 @@
 .add-usage-btn:hover {
   background: #45a049;
   transform: translateY(-1px);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.save-btn {
+  padding: 12px 24px;
+  background: #28a745;
+  color: white;
+  border: 2px solid #28a745;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #218838;
+  border-color: #218838;
+}
+
+.save-btn:disabled {
+  background: #6c757d;
+  border-color: #6c757d;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .manual-entry {
+    width: 95%;
+    padding: 16px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .storage-selects {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
 }

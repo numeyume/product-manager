@@ -9,6 +9,13 @@ interface PrivateRouteProps {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
+  console.log('PrivateRoute状態:', { 
+    user: !!user, 
+    loading, 
+    userEmail: user?.email || 'なし',
+    デモユーザー: localStorage.getItem('demoUser') ? 'あり' : 'なし'
+  });
+
   if (loading) {
     return <div>Loading...</div>;
   }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './SearchBar.css';
 
 interface SearchBarProps {
-  onSearch: (searchTerm: string, category: string, storageLevel1: string) => void;
+  onSearch: (searchTerm: string, category: string, storageLevel1: string, hideOutOfStock: boolean) => void;
   categories: string[];
   storageLocations: string[];
 }
@@ -11,16 +11,24 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, categories, stor
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedStorage, setSelectedStorage] = useState('');
+  const [hideOutOfStock, setHideOutOfStock] = useState(false);
 
   const handleSearch = () => {
-    onSearch(searchTerm, selectedCategory, selectedStorage);
+    onSearch(searchTerm, selectedCategory, selectedStorage, hideOutOfStock);
   };
 
   const handleReset = () => {
     setSearchTerm('');
     setSelectedCategory('');
     setSelectedStorage('');
-    onSearch('', '', '');
+    setHideOutOfStock(false);
+    onSearch('', '', '', false);
+  };
+
+  const handleToggleHideOutOfStock = () => {
+    const newValue = !hideOutOfStock;
+    setHideOutOfStock(newValue);
+    onSearch(searchTerm, selectedCategory, selectedStorage, newValue);
   };
 
   return (
@@ -55,6 +63,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, categories, stor
           <option key={loc} value={loc}>{loc}</option>
         ))}
       </select>
+      
+      <label className="stock-filter">
+        <input
+          type="checkbox"
+          checked={hideOutOfStock}
+          onChange={handleToggleHideOutOfStock}
+        />
+        <span>在庫切れを非表示</span>
+      </label>
       
       <button onClick={handleSearch} className="search-btn">検索</button>
       <button onClick={handleReset} className="reset-btn">リセット</button>

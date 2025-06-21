@@ -10,9 +10,12 @@ export const localStorageDB = {
       if (!stored) return [];
       
       const products = JSON.parse(stored);
-      // Date型に変換
+      // Date型に変換 & 新フィールドのデフォルト値設定
       return products.map((product: any) => ({
         ...product,
+        quantity: product.quantity || 1,
+        remainingQuantity: product.remainingQuantity !== undefined ? product.remainingQuantity : (product.quantity || 1),
+        unitPrice: product.unitPrice || Math.round((product.price || 0) / (product.quantity || 1)),
         purchaseDate: new Date(product.purchaseDate),
         createdAt: new Date(product.createdAt)
       }));
@@ -27,7 +30,7 @@ export const localStorageDB = {
     const products = localStorageDB.getProducts();
     const newProduct: Product = {
       ...product,
-      id: Date.now().toString() // 簡単なID生成
+      id: Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9) // ユニークなID生成
     };
     
     products.push(newProduct);
@@ -49,13 +52,32 @@ export const localStorageDB = {
 
   // 商品の削除
   deleteProduct: (id: string): boolean => {
+    console.log('localStorage削除処理:', { 削除ID: id });
+    
     const products = localStorageDB.getProducts();
+    console.log('削除前の商品リスト:', products.map(p => ({ id: p.id, name: p.itemName })));
+    
     const filteredProducts = products.filter(p => p.id !== id);
     
-    if (filteredProducts.length === products.length) return false;
+    console.log('フィルター後:', {
+      元の商品数: products.length,
+      フィルター後の商品数: filteredProducts.length,
+      削除対象が見つかったか: products.length !== filteredProducts.length
+    });
+    
+    if (filteredProducts.length === products.length) {
+      console.warn('削除対象が見つかりませんでした:', id);
+      return false;
+    }
     
     localStorage.setItem(DEMO_PRODUCTS_KEY, JSON.stringify(filteredProducts));
+    console.log('削除完了');
     return true;
+  },
+
+  // 商品の在庫数更新
+  updateProductQuantity: (id: string, remainingQuantity: number): boolean => {
+    return localStorageDB.updateProduct(id, { remainingQuantity });
   },
 
   // 全商品の削除（デバッグ用）

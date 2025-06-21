@@ -16,11 +16,17 @@ const firebaseConfig = {
 const isFirebaseConfigured = Boolean(
   process.env.REACT_APP_FIREBASE_API_KEY &&
   process.env.REACT_APP_FIREBASE_PROJECT_ID &&
-  !process.env.REACT_APP_FIREBASE_API_KEY.includes('your-') &&
-  !process.env.REACT_APP_FIREBASE_PROJECT_ID.includes('your-')
+  process.env.REACT_APP_FIREBASE_API_KEY !== 'your-api-key' &&
+  process.env.REACT_APP_FIREBASE_PROJECT_ID !== 'your-project-id' &&
+  process.env.REACT_APP_FIREBASE_API_KEY.startsWith('AIza')
 );
 
-console.log('Firebase configured:', isFirebaseConfigured);
+console.log('Firebase設定確認:', {
+  configured: isFirebaseConfigured,
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? '設定済み' : '未設定',
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || '未設定',
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN ? '設定済み' : '未設定'
+});
 
 let app: any;
 let auth: any;
@@ -31,7 +37,17 @@ try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  
+  // Google認証プロバイダーの設定
+  googleProvider.addScope('email');
+  googleProvider.addScope('profile');
+  googleProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
+  
   db = getFirestore(app);
+  
+  console.log('Firebase initialized successfully');
 } catch (error) {
   console.warn('Firebase initialization failed:', error);
   console.log('Running in demo mode without Firebase');

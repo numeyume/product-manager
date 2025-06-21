@@ -57,11 +57,40 @@
 
 .site-badge {
   background: #f0f0f0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.site-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.site-badge.clickable:hover {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .source-badge {
   background: #e3f2fd;
   color: #1976d2;
+  border: none;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.clickable-source {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickable-source:hover {
+  background: #bbdefb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .product-info {
@@ -90,7 +119,8 @@
 
 .link-btn,
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.use-btn {
   padding: 6px 12px;
   border: none;
   border-radius: 4px;
@@ -98,6 +128,7 @@
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
+  transition: all 0.2s ease;
 }
 
 .link-btn {
@@ -115,8 +146,62 @@
   color: white;
 }
 
+.use-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.quantity-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.out-of-stock {
+  color: #f44336;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reorder-btn {
+  padding: 4px 8px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reorder-btn:hover {
+  background: #f57c00;
+  transform: translateY(-1px);
+}
+
+.usage-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.usage-tag {
+  background: #fff3e0;
+  color: #f57c00;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #ffcc02;
+}
+
 .link-btn:hover,
 .edit-btn:hover,
-.delete-btn:hover {
+.delete-btn:hover,
+.use-btn:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }

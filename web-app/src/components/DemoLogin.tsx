@@ -1,20 +1,25 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDemoMode } from './DemoModeProvider';
 
 export const DemoLogin: React.FC = () => {
   const navigate = useNavigate();
+  const { startDemoMode } = useDemoMode();
 
   const handleDemoLogin = () => {
-    // デモ用の一時的なユーザー情報をローカルストレージに保存
-    const demoUser = {
-      uid: 'demo-user-123',
-      email: 'demo@example.com',
-      displayName: 'デモユーザー',
-      photoURL: 'https://via.placeholder.com/100'
-    };
+    console.log('デモモードボタンがクリックされました');
     
-    localStorage.setItem('demoUser', JSON.stringify(demoUser));
-    window.location.reload(); // ページをリロードして認証状態を更新
+    try {
+      startDemoMode();
+      console.log('デモモードを開始します');
+      
+      // ダッシュボードに移動
+      navigate('/');
+      
+    } catch (error) {
+      console.error('デモモードログインエラー:', error);
+      alert('デモモードの開始に失敗しました');
+    }
   };
 
   return (

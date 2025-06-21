@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, isFirebaseConfigured } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { localStorageDB } from '../utils/localStorage';
 import './StorageManager.css';
 
 interface StorageManagerProps {
@@ -25,103 +26,142 @@ export const StorageManager: React.FC<StorageManagerProps> = ({ onClose }) => {
   const [selectedLevel2, setSelectedLevel2] = useState('');
   const [newLevel3, setNewLevel3] = useState('');
 
+  const level1Options = useMemo(() => Object.keys(storageData), [storageData]);
+  const level2Options = useMemo(() => {
+    return selectedLevel1 ? Object.keys(storageData[selectedLevel1] || {}) : [];
+  }, [storageData, selectedLevel1]);
+
   useEffect(() => {
     loadStorageData();
   }, [user]);
 
-  const loadStorageData = async () => {
+  const loadStorageData = useCallback(async () => {
     if (!user) return;
 
     try {
-      const docRef = doc(db, `users/${user.uid}/settings`, 'storage');
-      const docSnap = await getDoc(docRef);
+      const isDemo = localStorage.getItem('demoUser');
       
-      if (docSnap.exists()) {
-        setStorageData(docSnap.data() as StorageStructure);
+      if (isDemo) {
+        const storedData = localStorage.getItem('storageData');
+        if (storedData) {
+          setStorageData(JSON.parse(storedData));
+        } else {
+          const defaultData: StorageStructure = {
+            '押入れ': {
+              '上段': ['ボックスA', 'ボックスB'],
+              '下段': ['ボックスC', 'ボックスD']
+            },
+            'クローゼット': {
+              '棚': ['左側', '右側'],
+              '引き出し': ['1段目', '2段目']
+            }
+          };
+          setStorageData(defaultData);
+        }
       } else {
-        const defaultData: StorageStructure = {
-          '押入れ': {
-            '上段': ['ボックスA', 'ボックスB'],
-            '下段': ['ボックスC', 'ボックスD']
-          },
-          'クローゼット': {
-            '棚': ['左側', '右側'],
-            '引き出し': ['1段目', '2段目']
+        if (isFirebaseConfigured && db) {
+          const docRef = doc(db, `users/${user.uid}/settings`, 'storage');
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setStorageData(docSnap.data() as StorageStructure);
+          } else {
+            const defaultData: StorageStructure = {
+              '押入れ': {
+                '上段': ['ボックスA', 'ボックスB'],
+                '下段': ['ボックスC', 'ボックスD']
+              },
+              'クローゼット': {
+                '棚': ['左側', '右側'],
+                '引き出し': ['1段目', '2段目']
+              }
+            };
+            setStorageData(defaultData);
           }
-        };
-        setStorageData(defaultData);
+        }
       }
     } catch (error) {
       console.error('Error loading storage data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const saveStorageData = async () => {
+  const saveStorageData = useCallback(async () => {
     if (!user) return;
 
     setSaving(true);
     try {
-      await setDoc(doc(db, `users/${user.uid}/settings`, 'storage'), storageData);
-      alert('保存しました');
+      const isDemo = localStorage.getItem('demoUser');
+      
+      if (isDemo) {
+        localStorage.setItem('storageData', JSON.stringify(storageData));
+        alert('保存しました');
+      } else {
+        if (isFirebaseConfigured && db) {
+          await setDoc(doc(db, `users/${user.uid}/settings`, 'storage'), storageData);
+          alert('保存しました');
+        }
+      }
     } catch (error) {
       console.error('Error saving storage data:', error);
       alert('保存に失敗しました');
     } finally {
       setSaving(false);
     }
-  };
+  }, [user, storageData]);
 
-  const addLevel1 = () => {
+  const addLevel1 = useCallback(() => {
     if (!newLevel1.trim()) return;
     
-    setStorageData({
-      ...storageData,
+    setStorageData(prev => ({
+      ...prev,
       [newLevel1]: {}
-    });
+    }));
     setNewLevel1('');
-  };
+  }, [newLevel1]);
 
-  const addLevel2 = () => {
+  const addLevel2 = useCallback(() => {
     if (!selectedLevel1 || !newLevel2.trim()) return;
     
-    setStorageData({
-      ...storageData,
+    setStorageData(prev => ({
+      ...prev,
       [selectedLevel1]: {
-        ...storageData[selectedLevel1],
+        ...prev[selectedLevel1],
         [newLevel2]: []
       }
-    });
+    }));
     setNewLevel2('');
-  };
+  }, [selectedLevel1, newLevel2]);
 
-  const addLevel3 = () => {
+  const addLevel3 = useCallback(() => {
     if (!selectedLevel1 || !selectedLevel2 || !newLevel3.trim()) return;
     
-    const currentLevel3 = storageData[selectedLevel1][selectedLevel2] || [];
-    
-    setStorageData({
-      ...storageData,
-      [selectedLevel1]: {
-        ...storageData[selectedLevel1],
-        [selectedLevel2]: [...currentLevel3, newLevel3]
-      }
+    setStorageData(prev => {
+      const currentLevel3 = prev[selectedLevel1][selectedLevel2] || [];
+      return {
+        ...prev,
+        [selectedLevel1]: {
+          ...prev[selectedLevel1],
+          [selectedLevel2]: [...currentLevel3, newLevel3]
+        }
+      };
     });
     setNewLevel3('');
-  };
+  }, [selectedLevel1, selectedLevel2, newLevel3]);
 
-  const deleteLevel3 = (level1: string, level2: string, level3: string) => {
-    const newLevel3Array = storageData[level1][level2].filter(item => item !== level3);
-    
-    setStorageData({
-      ...storageData,
-      [level1]: {
-        ...storageData[level1],
-        [level2]: newLevel3Array
-      }
+  const deleteLevel3 = useCallback((level1: string, level2: string, level3: string) => {
+    setStorageData(prev => {
+      const newLevel3Array = prev[level1][level2].filter(item => item !== level3);
+      return {
+        ...prev,
+        [level1]: {
+          ...prev[level1],
+          [level2]: newLevel3Array
+        }
+      };
     });
-  };
+  }, []);
 
   if (loading) {
     return <div className="modal-overlay"><div className="loading">読み込み中...</div></div>;
@@ -153,7 +193,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({ onClose }) => {
               onChange={e => setSelectedLevel1(e.target.value)}
             >
               <option value="">場所1を選択</option>
-              {Object.keys(storageData).map(level1 => (
+              {level1Options.map(level1 => (
                 <option key={level1} value={level1}>{level1}</option>
               ))}
             </select>
@@ -179,7 +219,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({ onClose }) => {
               }}
             >
               <option value="">場所1を選択</option>
-              {Object.keys(storageData).map(level1 => (
+              {level1Options.map(level1 => (
                 <option key={level1} value={level1}>{level1}</option>
               ))}
             </select>
@@ -189,7 +229,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({ onClose }) => {
               disabled={!selectedLevel1}
             >
               <option value="">場所2を選択</option>
-              {selectedLevel1 && Object.keys(storageData[selectedLevel1] || {}).map(level2 => (
+              {level2Options.map(level2 => (
                 <option key={level2} value={level2}>{level2}</option>
               ))}
             </select>

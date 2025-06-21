@@ -16,7 +16,7 @@ export const ProductEdit: React.FC<ProductEditProps> = ({ product, onClose }) =>
     itemName: product.itemName,
     price: product.price,
     category: product.category,
-    memo: product.memo,
+    memo: product.memo || '',
     storage: {
       level1: product.storage.level1,
       level2: product.storage.level2,

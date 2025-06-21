@@ -12,7 +12,7 @@ export interface Product {
   price: number;
   purchaseDate: Date;
   category: string;
-  memo: string;
+  memo?: string;
   storage: Storage;
   source?: 'gmail' | 'extension' | 'manual';
   createdAt: Date;

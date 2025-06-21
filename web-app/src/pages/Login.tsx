@@ -36,14 +36,25 @@ export const Login: React.FC = () => {
         
         <div style={{
           marginTop: '15px',
-          padding: '10px',
+          padding: '15px',
           background: '#f8f9fa',
           borderRadius: '4px',
-          fontSize: '12px',
-          color: '#666'
+          fontSize: '13px',
+          color: '#666',
+          border: '1px solid #e3e6f0'
         }}>
-          💡 Googleログインには Firebase 設定が必要です。<br/>
-          設定前は「デモモード」でアプリをお試しください。
+          <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#495057' }}>
+            🔧 Googleログインエラーが発生した場合:
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            1️⃣ <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff' }}>Firebase Console</a> で Google認証を有効化
+          </div>
+          <div style={{ marginBottom: '8px' }}>
+            2️⃣ プロジェクト: <code>product-manager-f8432</code> → Authentication → Sign-in method → Google を有効化
+          </div>
+          <div>
+            ⚡ 設定前は「デモモード」でアプリをお試しください
+          </div>
         </div>
       </div>
     </div>

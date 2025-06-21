@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "商品管理",
+  "name": "通販商品管理アプリ - 重複購入防止",
+  "description": "在庫がある商品の重複購入を自動で検出・警告するスマート商品管理アプリ",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,43 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait-primary",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "categories": ["shopping", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "在庫確認",
+      "short_name": "在庫確認",
+      "description": "現在の在庫状況を確認",
+      "url": "/?action=check-stock",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "商品登録",
+      "short_name": "商品登録",
+      "description": "新しい商品を登録",
+      "url": "/?action=add-product",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "重複チェック",
+      "short_name": "重複チェック",
+      "description": "重複商品をテスト",
+      "url": "/?action=duplicate-test",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }

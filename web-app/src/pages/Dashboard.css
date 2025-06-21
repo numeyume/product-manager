@@ -22,6 +22,7 @@
   gap: 10px;
 }
 
+.pwa-setup-btn,
 .usage-guide-btn,
 .manual-entry-btn,
 .test-btn,
@@ -35,6 +36,16 @@
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
+}
+
+.pwa-setup-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: white;
+}
+
+.pwa-setup-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
 .usage-guide-btn {

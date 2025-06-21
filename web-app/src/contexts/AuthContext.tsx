@@ -47,18 +47,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isDemoMode, demoUser]);
 
   const signInWithGoogle = async () => {
-    console.log('Google認証開始:', {
-      isFirebaseConfigured,
+    console.log('🚀 Google認証開始');
+    console.log('Firebase状態:', {
+      configured: isFirebaseConfigured,
       auth: !!auth,
       googleProvider: !!googleProvider
     });
 
-    if (!isFirebaseConfigured) {
-      throw new Error('Firebase設定が見つかりません。デモモードをご利用ください。');
-    }
-
-    if (!auth || !googleProvider) {
-      throw new Error('Firebase認証が初期化されていません。ページをリロードしてください。');
+    if (!isFirebaseConfigured || !auth || !googleProvider) {
+      console.error('❌ Firebase初期化失敗 - デモモードを使用してください');
+      throw new Error('Firebase設定エラー。デモモードをご利用ください。');
     }
     
     try {

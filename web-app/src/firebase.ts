@@ -2,36 +2,24 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase設定の確認
+// Firebase設定 - 直接指定で確実に動作
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'demo-api-key',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || 'demo-project',
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '123456789',
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || '1:123456789:web:demo'
+  apiKey: "AIzaSyBiNdLhhzJxdd4oYa1ZVHD6pWZOnndxVXA",
+  authDomain: "product-manager-f8432.firebaseapp.com",
+  projectId: "product-manager-f8432",
+  storageBucket: "product-manager-f8432.firebasestorage.app",
+  messagingSenderId: "163137870258",
+  appId: "1:163137870258:web:4cedb8a24aa6326a89ecab"
 };
 
-// Firebase設定が有効かチェック
-const isFirebaseConfigured = Boolean(
-  process.env.REACT_APP_FIREBASE_API_KEY &&
-  process.env.REACT_APP_FIREBASE_PROJECT_ID &&
-  process.env.REACT_APP_FIREBASE_API_KEY !== 'your-api-key' &&
-  process.env.REACT_APP_FIREBASE_PROJECT_ID !== 'your-project-id' &&
-  process.env.REACT_APP_FIREBASE_API_KEY.startsWith('AIza')
-);
+console.log('🔥 Firebase設定を直接指定で初期化します');
 
-console.log('Firebase設定確認:', {
-  configured: isFirebaseConfigured,
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? '設定済み' : '未設定',
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || '未設定',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN ? '設定済み' : '未設定'
-});
-
+// Firebase初期化を確実に実行
 let app: any;
 let auth: any;
 let googleProvider: any;
 let db: any;
+let isFirebaseConfigured = true; // 強制的にtrueに設定
 
 try {
   app = initializeApp(firebaseConfig);
@@ -47,15 +35,17 @@ try {
   
   db = getFirestore(app);
   
-  console.log('Firebase initialized successfully');
+  console.log('✅ Firebase初期化成功');
+  console.log('✅ Google認証プロバイダー設定完了');
+  
 } catch (error) {
-  console.warn('Firebase initialization failed:', error);
-  console.log('Running in demo mode without Firebase');
+  console.error('❌ Firebase初期化失敗:', error);
   
   // デモモード用のダミーオブジェクト
   auth = null;
   googleProvider = null;
   db = null;
+  isFirebaseConfigured = false;
 }
 
 export { auth, googleProvider, db, isFirebaseConfigured };

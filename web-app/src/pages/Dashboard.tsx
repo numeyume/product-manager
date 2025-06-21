@@ -11,6 +11,7 @@ import { TestMode } from '../components/TestMode';
 import { ManualProductEntry } from '../components/ManualProductEntry';
 import { BusinessModeToggle } from '../components/BusinessModeToggle';
 import { UsageGuide } from '../components/UsageGuide';
+import { PWASetup } from '../components/PWASetup';
 import { localStorageDB } from '../utils/localStorage';
 import './Dashboard.css';
 
@@ -24,6 +25,7 @@ export const Dashboard: React.FC = () => {
   const [showTestMode, setShowTestMode] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [showUsageGuide, setShowUsageGuide] = useState(false);
+  const [showPWASetup, setShowPWASetup] = useState(false);
   const [isBusinessMode, setIsBusinessMode] = useState(() => {
     return localStorage.getItem('businessMode') === 'true';
   });
@@ -214,6 +216,9 @@ export const Dashboard: React.FC = () => {
           />
         </div>
         <div className="header-actions">
+          <button onClick={() => setShowPWASetup(true)} className="pwa-setup-btn">
+            🚀 無意識化設定
+          </button>
           <button onClick={() => setShowUsageGuide(true)} className="usage-guide-btn">
             📖 使い方
           </button>
@@ -306,6 +311,10 @@ export const Dashboard: React.FC = () => {
 
       {showUsageGuide && (
         <UsageGuide onClose={() => setShowUsageGuide(false)} />
+      )}
+
+      {showPWASetup && (
+        <PWASetup onClose={() => setShowPWASetup(false)} />
       )}
     </div>
   );

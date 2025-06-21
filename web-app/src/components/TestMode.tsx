@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, isFirebaseConfigured } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { generateTestProducts, generateMockEmail, getSimilarProducts } from '../utils/testData';
+import { localStorageDB } from '../utils/localStorage';
 import './TestMode.css';
 
 interface TestModeProps {
@@ -24,9 +25,25 @@ export const TestMode: React.FC<TestModeProps> = ({ onClose }) => {
       const testProducts = generateTestProducts(count);
       const results: string[] = [];
       
-      for (const product of testProducts) {
-        const docRef = await addDoc(collection(db, `users/${user.uid}/items`), product);
-        results.push(`✅ ${product.itemName} を追加しました（${product.site}）`);
+      // デモモードの場合はローカルストレージに保存
+      const isDemo = localStorage.getItem('demoUser');
+      if (isDemo) {
+        for (const product of testProducts) {
+          localStorageDB.saveProduct(product);
+          results.push(`✅ ${product.itemName} を追加しました（${product.site}）`);
+        }
+        results.push('');
+        results.push('🔄 ページをリロードすると一覧に表示されます');
+      } else {
+        // Firebase認証の場合は通常のFirestore処理
+        if (isFirebaseConfigured && db) {
+          for (const product of testProducts) {
+            await addDoc(collection(db, `users/${user.uid}/items`), product);
+            results.push(`✅ ${product.itemName} を追加しました（${product.site}）`);
+          }
+        } else {
+          results.push('❌ Firebase設定が必要です');
+        }
       }
       
       setTestResults(results);

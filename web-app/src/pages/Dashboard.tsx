@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, isFirebaseConfigured } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { Product } from '../types/Product';
 import { ProductList } from '../components/ProductList';
@@ -8,6 +8,7 @@ import { SearchBar } from '../components/SearchBar';
 import { StorageManager } from '../components/StorageManager';
 import { GmailSetup } from '../components/GmailSetup';
 import { TestMode } from '../components/TestMode';
+import { localStorageDB } from '../utils/localStorage';
 import './Dashboard.css';
 
 export const Dashboard: React.FC = () => {
@@ -22,28 +23,44 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return;
 
-    const q = query(
-      collection(db, `users/${user.uid}/items`),
-      orderBy('purchaseDate', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items: Product[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        items.push({
-          id: doc.id,
-          ...data,
-          purchaseDate: data.purchaseDate.toDate(),
-          createdAt: data.createdAt.toDate()
-        } as Product);
-      });
-      setProducts(items);
-      setFilteredProducts(items);
+    // デモモードの場合はローカルストレージから取得
+    const isDemo = localStorage.getItem('demoUser');
+    if (isDemo) {
+      const demoProducts = localStorageDB.getProducts();
+      setProducts(demoProducts);
+      setFilteredProducts(demoProducts);
       setLoading(false);
-    });
+      return;
+    }
 
-    return () => unsubscribe();
+    // Firebase認証の場合は通常のFirestore処理
+    if (isFirebaseConfigured && db) {
+      const q = query(
+        collection(db, `users/${user.uid}/items`),
+        orderBy('purchaseDate', 'desc')
+      );
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const items: Product[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          items.push({
+            id: doc.id,
+            ...data,
+            purchaseDate: data.purchaseDate.toDate(),
+            createdAt: data.createdAt.toDate()
+          } as Product);
+        });
+        setProducts(items);
+        setFilteredProducts(items);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    } else {
+      // Firebase未設定の場合はローディング完了
+      setLoading(false);
+    }
   }, [user]);
 
   const handleSearch = (searchTerm: string, category: string, storageLevel1: string) => {
@@ -71,7 +88,22 @@ export const Dashboard: React.FC = () => {
     
     if (window.confirm('この商品を削除しますか？')) {
       try {
-        await deleteDoc(doc(db, `users/${user.uid}/items`, productId));
+        // デモモードの場合はローカルストレージから削除
+        const isDemo = localStorage.getItem('demoUser');
+        if (isDemo) {
+          const success = localStorageDB.deleteProduct(productId);
+          if (success) {
+            const updatedProducts = localStorageDB.getProducts();
+            setProducts(updatedProducts);
+            setFilteredProducts(updatedProducts);
+          }
+          return;
+        }
+
+        // Firebase認証の場合は通常のFirestore処理
+        if (isFirebaseConfigured && db) {
+          await deleteDoc(doc(db, `users/${user.uid}/items`, productId));
+        }
       } catch (error) {
         console.error('Error deleting product:', error);
       }

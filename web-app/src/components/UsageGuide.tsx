@@ -122,10 +122,21 @@ export const UsageGuide: React.FC<UsageGuideProps> = ({ onClose }) => {
             <h3>⚙️ 詳細機能</h3>
             <div className="feature-details">
               <div className="feature-item">
+                <h4>🚨 重複購入防止</h4>
+                <ul>
+                  <li><strong>AIベース検出:</strong> 商品名・URL・価格の類似度を総合判定</li>
+                  <li><strong>在庫警告:</strong> 在庫がある商品の重複購入を事前に警告</li>
+                  <li><strong>スマート統合:</strong> 既存商品への数量追加を提案</li>
+                  <li><strong>視覚的警告:</strong> 在庫レベル別の色分け表示</li>
+                </ul>
+              </div>
+              
+              <div className="feature-item">
                 <h4>📦 商品登録</h4>
                 <ul>
                   <li><strong>手動登録:</strong> 商品名、価格、数量等を直接入力</li>
                   <li><strong>Gmail連携:</strong> 注文確認メールから自動抽出</li>
+                  <li><strong>重複チェック:</strong> 登録時に自動で類似商品を検出</li>
                   <li>商品URLを保存してワンクリックでサイトへ</li>
                 </ul>
               </div>
@@ -188,6 +199,16 @@ export const UsageGuide: React.FC<UsageGuideProps> = ({ onClose }) => {
           <section className="guide-section">
             <h3>🔧 よくある質問・トラブル</h3>
             <div className="faq">
+              <div className="faq-item">
+                <h4>Q: 重複警告が出たが別商品として登録したい</h4>
+                <p>A: 警告画面で「🆕 別商品として登録」を選択してください。類似商品でも異なる用途や仕様の場合は別登録可能です。</p>
+              </div>
+              
+              <div className="faq-item">
+                <h4>Q: 重複警告が出ないのに同じ商品を登録してしまった</h4>
+                <p>A: 商品名が大きく異なる場合は検出されない場合があります。🧪テストモードの「重複検出テスト」で精度を確認できます。</p>
+              </div>
+              
               <div className="faq-item">
                 <h4>Q: Gmail連携でエラーが出る</h4>
                 <p>A: Firebase設定が正しいか確認してください。デモモードでは代替機能をお試しください。</p>

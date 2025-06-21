@@ -3,6 +3,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { generateTestProducts, generateMockEmail, getSimilarProducts } from '../utils/testData';
+import { checkDuplicateProduct, checkInventoryWarning } from '../utils/duplicateChecker';
 import { localStorageDB } from '../utils/localStorage';
 import './TestMode.css';
 
@@ -70,21 +71,56 @@ export const TestMode: React.FC<TestModeProps> = ({ onClose }) => {
   };
 
   const testDuplicateDetection = () => {
-    const testProductName = 'Anker モバイルバッテリー PowerCore';
-    const similarProducts = getSimilarProducts(testProductName);
+    // 既存商品を取得
+    const existingProducts = localStorageDB.getProducts();
+    
+    // テスト用新商品
+    const testNewProduct = {
+      itemName: 'Anker PowerCore 10000 モバイルバッテリー',
+      price: 2990,
+      quantity: 1,
+      site: 'Amazon' as const,
+      url: 'https://www.amazon.co.jp/dp/B01234567'
+    };
+    
+    // 重複チェック実行
+    const duplicateResult = checkDuplicateProduct(testNewProduct, existingProducts);
+    const inventoryWarning = checkInventoryWarning(testNewProduct, existingProducts);
     
     const results = [
-      `🔍 重複検出テスト: "${testProductName}"`,
-      '以下の類似商品が検出されました:',
-      '------------------------'
+      `🔍 重複検出テスト: "${testNewProduct.itemName}"`,
+      '=================================',
+      '',
+      '📊 検出結果:',
+      `• 重複判定: ${duplicateResult.isDuplicate ? '🚨 重複あり' : '✅ 重複なし'}`,
+      `• 推奨アクション: ${duplicateResult.suggestion}`,
+      '',
+      '💬 システムメッセージ:',
+      duplicateResult.message,
+      '',
+      '⚠️ 在庫警告:',
+      inventoryWarning.hasWarning ? '🚨 在庫ありの類似商品が存在' : '✅ 在庫警告なし'
     ];
     
-    similarProducts.forEach((product, index) => {
-      results.push(`${index + 1}. ${product.itemName} (${product.site}) - ¥${product.price.toLocaleString()}`);
-    });
+    if (inventoryWarning.hasWarning) {
+      results.push('');
+      results.push('📦 在庫ありの類似商品:');
+      inventoryWarning.products.forEach((product, index) => {
+        results.push(`${index + 1}. ${product.itemName} (残り${product.remainingQuantity}個)`);
+      });
+    }
     
+    if (duplicateResult.existingProduct) {
+      results.push('');
+      results.push('🔍 最も類似の既存商品:');
+      results.push(`商品名: ${duplicateResult.existingProduct.itemName}`);
+      results.push(`価格: ¥${duplicateResult.existingProduct.price.toLocaleString()}`);
+      results.push(`残り在庫: ${duplicateResult.existingProduct.remainingQuantity}個`);
+    }
+    
+    results.push('');
     results.push('------------------------');
-    results.push('💡 Chrome拡張でこれらの商品ページを訪問すると警告が表示されます');
+    results.push('💡 この機能により、同じ商品の重複購入を防げます');
     
     setTestResults(results);
   };

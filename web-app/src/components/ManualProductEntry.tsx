@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { localStorageDB } from '../utils/localStorage';
 import { Product, Storage, Usage } from '../types/Product';
+import { checkDuplicateProduct, mergeProducts, DuplicateCheckResult } from '../utils/duplicateChecker';
+import { DuplicateWarningModal } from './DuplicateWarningModal';
 import './ManualProductEntry.css';
 
 interface ManualProductEntryProps {
   onClose: () => void;
   onProductAdded?: () => void;
+  existingProducts?: Product[];
 }
 
-export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose, onProductAdded }) => {
+export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose, onProductAdded, existingProducts = [] }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<Partial<Product>>({
     itemName: '',
@@ -31,6 +34,8 @@ export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose,
   const [storageData, setStorageData] = useState<any>({});
   const [saving, setSaving] = useState(false);
   const [showUsageFields, setShowUsageFields] = useState(false);
+  const [duplicateCheck, setDuplicateCheck] = useState<DuplicateCheckResult | null>(null);
+  const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     loadStorageData();
@@ -125,37 +130,71 @@ export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose,
       return;
     }
 
+    const quantity = formData.quantity!;
+    const totalPrice = formData.price!;
+    const unitPrice = Math.round(totalPrice / quantity);
+
+    const newProduct: Product = {
+      itemName: formData.itemName!,
+      url: formData.url || '',
+      site: formData.site as 'Amazon' | '楽天' | 'メルカリ' | '仕入れ先' | 'その他',
+      price: totalPrice,
+      quantity: quantity,
+      remainingQuantity: quantity,
+      unitPrice: unitPrice,
+      purchaseDate: new Date(),
+      category: formData.category || categorizeProduct(formData.itemName!),
+      memo: formData.memo,
+      storage: formData.storage!,
+      usage: formData.usage,
+      source: 'manual',
+      createdAt: new Date()
+    };
+
+    // 重複チェック実行
+    const duplicateResult = checkDuplicateProduct(newProduct, existingProducts);
+    
+    if (duplicateResult.isDuplicate || duplicateResult.suggestion === 'add_quantity') {
+      setDuplicateCheck(duplicateResult);
+      setPendingProduct(newProduct);
+      return;
+    }
+
+    // 重複なしの場合は直接保存
+    await saveProduct(newProduct);
+  };
+
+  const handleDuplicateAction = async (action: 'merge' | 'create_new' | 'cancel') => {
+    if (!pendingProduct || !duplicateCheck) return;
+
+    if (action === 'cancel') {
+      setDuplicateCheck(null);
+      setPendingProduct(null);
+      return;
+    }
+
+    if (action === 'merge' && duplicateCheck.existingProduct) {
+      const mergedProduct = mergeProducts(duplicateCheck.existingProduct, pendingProduct);
+      await updateExistingProduct(mergedProduct);
+    } else if (action === 'create_new') {
+      await saveProduct(pendingProduct);
+    }
+
+    setDuplicateCheck(null);
+    setPendingProduct(null);
+  };
+
+  const saveProduct = async (product: Product) => {
     setSaving(true);
-
     try {
-      const quantity = formData.quantity!;
-      const totalPrice = formData.price!;
-      const unitPrice = Math.round(totalPrice / quantity);
-
-      const newProduct: Product = {
-        itemName: formData.itemName!,
-        url: formData.url || '',
-        site: formData.site as 'Amazon' | '楽天' | 'メルカリ',
-        price: totalPrice,
-        quantity: quantity,
-        remainingQuantity: quantity,
-        unitPrice: unitPrice,
-        purchaseDate: new Date(),
-        category: formData.category || categorizeProduct(formData.itemName!),
-        memo: formData.memo,
-        storage: formData.storage!,
-        source: 'manual',
-        createdAt: new Date()
-      };
-
       const isDemo = localStorage.getItem('demoUser');
       
       if (isDemo) {
-        localStorageDB.saveProduct(newProduct);
+        localStorageDB.saveProduct(product);
         alert('商品を登録しました');
       } else {
         if (isFirebaseConfigured && db && user) {
-          await addDoc(collection(db, `users/${user.uid}/items`), newProduct);
+          await addDoc(collection(db, `users/${user.uid}/items`), product);
           alert('商品を登録しました');
         } else {
           alert('Firebase設定が必要です');
@@ -168,6 +207,33 @@ export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose,
     } catch (error) {
       console.error('Product save error:', error);
       alert('商品の登録に失敗しました');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateExistingProduct = async (product: Product) => {
+    setSaving(true);
+    try {
+      const isDemo = localStorage.getItem('demoUser');
+      
+      if (isDemo) {
+        if (product.id) {
+          localStorageDB.updateProduct(product.id, product);
+          alert('既存商品に追加しました');
+        }
+      } else {
+        if (isFirebaseConfigured && db && user && product.id) {
+          await setDoc(doc(db, `users/${user.uid}/items`, product.id), product);
+          alert('既存商品に追加しました');
+        }
+      }
+
+      if (onProductAdded) onProductAdded();
+      onClose();
+    } catch (error) {
+      console.error('Product update error:', error);
+      alert('商品の更新に失敗しました');
     } finally {
       setSaving(false);
     }
@@ -397,6 +463,14 @@ export const ManualProductEntry: React.FC<ManualProductEntryProps> = ({ onClose,
           </div>
         </form>
       </div>
+
+      {duplicateCheck && pendingProduct && (
+        <DuplicateWarningModal
+          duplicateResult={duplicateCheck}
+          newProduct={pendingProduct}
+          onConfirm={handleDuplicateAction}
+        />
+      )}
     </div>
   );
 };

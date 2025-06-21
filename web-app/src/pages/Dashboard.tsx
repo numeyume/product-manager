@@ -300,6 +300,7 @@ export const Dashboard: React.FC = () => {
         <ManualProductEntry 
           onClose={() => setShowManualEntry(false)} 
           onProductAdded={handleProductAdded}
+          existingProducts={products}
         />
       )}
 
